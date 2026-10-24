@@ -1,0 +1,53 @@
+services:
+  postgresdb:
+    image: postgres:16-alpine
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: exam_2400030347
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - foodtruck-net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: chakresh777/docker-backend-2400030347:latest
+    container_name: docker-backend-2400030347
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgresdb:5432/exam_2400030347
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: root
+      SERVER_PORT: 8081
+    ports:
+      - "8081:8081"
+    depends_on:
+      - postgresdb
+    restart: on-failure
+    networks:
+      - foodtruck-net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: chakresh777/docker-frontend-2400030347:latest
+    container_name: docker-frontend-2400030347
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: on-failure
+    networks:
+      - foodtruck-net
+
+volumes:
+  postgres_data:
+
+networks:
+  foodtruck-net:
